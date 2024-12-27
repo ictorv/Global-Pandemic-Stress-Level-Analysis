@@ -1,152 +1,197 @@
-import streamlit as st
-import pickle
-import pandas as pd
-import numpy as np
 
 # Page configuration
 st.set_page_config(
-    page_title="Pandemic Stress Analysis",
-    page_icon="🧠",
+    page_title="Wellness Analytics",
+    page_icon="🌸",
     layout="wide"
 )
 
-# Enhanced CSS styling with beautiful buttons
 st.markdown("""
     <style>
-    /* Main container styling */
+    /* Main container styling with elegant gradient */
     .main {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         padding: 20px;
-        background-color: #f8f9fa;
+        min-height: 100vh;
+        background-attachment: fixed;
+    }
+    
+    /* Elegant container styling */
+    .css-1d391kg {
+        background: linear-gradient(to right, #fff5f5, #fff8f8);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     }
     
     /* Custom radio button styling */
     .stRadio > label {
         font-weight: 500;
-        color: #2c3e50;
+        color: #5d576b;
+        font-family: 'Quicksand', sans-serif;
     }
     
     .stRadio > div {
         display: flex;
-        gap: 10px;
-        margin-top: 5px;
+        gap: 12px;
+        margin-top: 8px;
     }
     
     .stRadio > div > label {
-        background-color: #ffffff;
+        background: linear-gradient(135deg, #faf9f9, #fff);
         padding: 10px 20px;
-        border: 2px solid #e0e0e0;
-        border-radius: 20px;
+        border: 2px solid #e9e4f0;
+        border-radius: 15px;
         cursor: pointer;
         transition: all 0.3s ease;
         min-width: 80px;
         text-align: center;
+        font-size: 0.95em;
+        color: #5d576b;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
     
     .stRadio > div > label:hover {
-        border-color: #4CAF50;
-        box-shadow: 0 2px 5px rgba(76, 175, 80, 0.2);
-    }
-    
-    .stRadio > div [data-baseweb="radio"]:checked + label {
-        background-color: #4CAF50;
-        color: white;
-        border-color: #4CAF50;
-        box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+        border-color: #b8a9c6;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
     
     /* Predict button styling */
     .stButton > button {
-        background: linear-gradient(45deg, #4CAF50, #45a049);
+        background: linear-gradient(135deg, #c2a5d9, #a691ce);
         color: white;
         padding: 15px 30px;
-        border-radius: 25px;
+        border-radius: 15px;
         border: none;
-        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        box-shadow: 0 4px 15px rgba(166, 145, 206, 0.3);
         transition: all 0.3s ease;
         width: 100%;
         font-size: 1.1em;
-        font-weight: 600;
+        font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 1px;
         margin-top: 20px;
     }
     
     .stButton > button:hover {
-        background: linear-gradient(45deg, #45a049, #4CAF50);
-        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        background: linear-gradient(135deg, #a691ce, #c2a5d9);
+        box-shadow: 0 6px 20px rgba(166, 145, 206, 0.4);
         transform: translateY(-2px);
     }
     
-    .stButton > button:active {
-        transform: translateY(0px);
-        box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
-    }
-    
-    /* Container styling */
-    .css-1d391kg {
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
     /* Sidebar styling */
-    .sidebar .sidebar-content {
-        background-color: #ffffff;
-        padding: 20px;
+    .css-1d391kg {
+        background: linear-gradient(135deg, #fff5f5, #faf0ff);
+        padding: 25px;
+        border-radius: 20px;
     }
     
     /* Header styling */
     h1 {
-        color: #1f4287;
+        font-family: 'Quicksand', sans-serif;
+        background: linear-gradient(135deg, #5d576b, #a691ce);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         text-align: center;
         padding: 20px;
         margin-bottom: 30px;
-        background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 10px;
-    }
-    
-    .stSubheader {
-        color: #2c3e50;
-        font-weight: 600;
-        padding: 10px 0;
-        border-bottom: 2px solid #4CAF50;
-        margin-bottom: 20px;
+        font-size: 2.3em;
+        letter-spacing: 1px;
     }
     
     /* Input field styling */
     .stNumberInput > div > div > input {
-        border-radius: 8px;
-        border: 2px solid #e0e0e0;
-        padding: 8px 12px;
+        background: #fff;
+        border: 2px solid #e9e4f0;
+        border-radius: 12px;
+        color: #5d576b;
+        padding: 10px 15px;
         transition: all 0.3s ease;
+        font-family: 'Quicksand', sans-serif;
     }
     
     .stNumberInput > div > div > input:focus {
-        border-color: #4CAF50;
-        box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        border-color: #a691ce;
+        box-shadow: 0 0 15px rgba(166, 145, 206, 0.2);
     }
     
     /* DataFrame styling */
     div[data-testid="stDataFrame"] {
-        background-color: white;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        background: #fff;
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px solid #e9e4f0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     }
     
-    /* Selectbox styling */
-    .stSelectbox > div > div {
-        border-radius: 8px;
-        border: 2px solid #e0e0e0;
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
     }
     
-    .stSelectbox > div > div:hover {
-        border-color: #4CAF50;
+    ::-webkit-scrollbar-track {
+        background: #f5f5f5;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #c2a5d9, #a691ce);
+        border-radius: 4px;
+    }
+    
+    /* Success message styling */
+    .element-container div[data-testid="stMarkdownContainer"] div.success {
+        background-color: #f0f7f4;
+        border-left: 5px solid #7fb9a2;
+        color: #2c584a;
+        padding: 1em;
+        border-radius: 0 10px 10px 0;
+    }
+    
+    /* Warning message styling */
+    .element-container div[data-testid="stMarkdownContainer"] div.warning {
+        background-color: #fff8f0;
+        border-left: 5px solid #f0b775;
+        color: #8b5e2b;
+        padding: 1em;
+        border-radius: 0 10px 10px 0;
+    }
+    
+    /* Error message styling */
+    .element-container div[data-testid="stMarkdownContainer"] div.error {
+        background-color: #fdf0f0;
+        border-left: 5px solid #e6a0a0;
+        color: #8b2b2b;
+        padding: 1em;
+        border-radius: 0 10px 10px 0;
+    }
+    
+    /* Card container styling */
+    .card {
+        background: #fff;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 15px 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e9e4f0;
+    }
+    
+    /* Animated background pattern */
+    .main::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23a691ce' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: -1;
     }
     </style>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
     """, unsafe_allow_html=True)
-
 # [Rest of the code remains exactly the same as in the previous version, starting from here]
 # Load the trained model
 
