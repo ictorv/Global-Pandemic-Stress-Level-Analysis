@@ -196,9 +196,8 @@ st.markdown("""
     
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
     """, unsafe_allow_html=True)
-# [Rest of the code remains exactly the same as in the previous version, starting from here]
-# Load the trained model
 
+# Load the trained model
 @st.cache_resource
 def load_models():
     """
@@ -223,7 +222,6 @@ def load_models():
 # Load all models at once using the cached function
 models = load_models()
 
-# Replace individual model references with dictionary access
 model = models['rfc']
 poly = models['poly2']
 scaler = models['scaler']
@@ -245,7 +243,7 @@ binary_features = [
     'Team_Collaboration_Challenges'
 ]
 
-# Title with emoji and description
+# Title
 st.markdown("""
     <h1>🧠 Global Pandemic Stress Level Analysis</h1>
     <div style='text-align: center; padding: 20px; margin-bottom: 30px; background-color: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);'>
@@ -302,7 +300,7 @@ sector = st.sidebar.selectbox(
 )
 input_df['Sector'] = sector
 
-# Show input with styled container
+# Show inpu
 st.markdown("""
     <div style='margin-bottom: 30px;'>
         <h3 style='color: #2c3e50; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;'>
@@ -330,7 +328,7 @@ if st.button("Predict Stress Level"):
         prediction = model.predict(transformed_input)
         prediction_proba = model.predict_proba(transformed_input)
 
-        # Display results in styled containers
+        # Display results in containers
         st.markdown("""
             <div style='background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 30px;'>
                 <h3 style='color: #2c3e50; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;'>
